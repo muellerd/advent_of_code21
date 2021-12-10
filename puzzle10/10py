@@ -1,0 +1,56 @@
+import math
+
+from utilities import filetoarray
+
+file = "input1.txt"
+lines = filetoarray(file)
+opening = ['(', '[', '{', '<']
+closing = [')', ']', '}', '>']
+openingToClosing = {'(': ')', '[': ']', '{': '}', '<': '>'}
+
+illegalCharacterToPoints = {')': 3, ']': 57, '}': 1197, '>': 25137}
+characterToCompletionPoints = {')': 1, ']': 2, '}': 3, '>': 4}
+
+incompleteLines = []
+
+illegalSum = 0
+for line in lines:
+    stack = []
+    corruptLine = False
+    for l in line:
+        if l in opening:
+            stack.append(l)
+        if l in closing:
+            prev = stack.pop()
+            if openingToClosing[prev] != l:
+                illegalSum += illegalCharacterToPoints[l]
+                corruptLine = True
+                break
+
+    if not corruptLine:
+        incompleteLines.append(line)
+
+print('Syntax error score: ' + str(illegalSum))
+
+completionScoreList = []
+for line in incompleteLines:
+    stack = []
+    for l in line:
+        if l in opening:
+            stack.append(l)
+        if l in closing:
+            stack.pop()
+
+    completionStringList = []
+    i = len(stack) - 1
+    completionScore = 0
+    while i >= 0:
+        completionStringList.append(openingToClosing[stack[i]])
+        completionScore = completionScore * 5 + characterToCompletionPoints[openingToClosing[stack[i]]]
+        i -= 1
+
+    completionScoreList.append(completionScore)
+
+completionScoreList = sorted(completionScoreList)
+print(completionScoreList)
+print('Completion middle score: ' + str(completionScoreList[int(math.ceil(len(completionScoreList)/2))-1]))
